@@ -22,7 +22,7 @@ object kafkaproducer extends Serializable{
     props.put("metadata.broker.list", brokers.toString)
     props.put("serializer.class", "kafka.serializer.StringEncoder")
     val config = new ProducerConfig(props)
-    val producer = new Producer[String, String](config)
+    val producer = new Producer[String, PcapPacket](config)
     // Send some messages
     val snaplen = 64 * 1024 // Capture all packets, no truncation
     val flags = Pcap.MODE_PROMISCUOUS // capture all packets
@@ -39,7 +39,7 @@ object kafkaproducer extends Serializable{
       val jpacketHandler = new PcapPacketHandler[String]() {
 
         def nextPacket(packet: PcapPacket, user: String) {
-          val data = new KeyedMessage[String,String](topic.toString,(packet).toString)
+          val data = new KeyedMessage[String,PcapPacket](topic.toString,(packet))
           println(data)
           producer.send(data)
 
